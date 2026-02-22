@@ -1,0 +1,173 @@
+version: "3.6"
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  homelab:
+    external: true
+    name: homelab
+
+  openclaw_default:
+    external: true
+    name: openclaw_default
+
+# =============================================================================
+# VOLUMES
+# =============================================================================
+volumes:
+  dnsmasq_data:
+    external: true
+  pihole_data:
+    external: true
+  portainer_data:
+    external: true
+
+# =============================================================================
+# SERVICES
+# =============================================================================
+services:
+
+  # ---------------------------------------------------------------------------
+  # HOMELAB UTILITIES
+  # ---------------------------------------------------------------------------
+
+  homepage:
+    container_name: homepage
+    image: ghcr.io/gethomepage/homepage:latest
+    restart: unless-stopped
+    command: ["node", "server.js"]
+    entrypoint: ["docker-entrypoint.sh"]
+    environment:
+      HOMEPAGE_ALLOWED_HOSTS: "100.123.195.125:3000,brickserver:3000"
+      NODE_ENV: production
+      PORT: "3000"
+    networks:
+      - homelab
+    ports:
+      - "100.123.195.125:3000:3000/tcp"
+    user: root
+    volumes:
+      - /opt/homepage/config:/app/config
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    working_dir: /app
+
+  portainer:
+    container_name: portainer
+    image: portainer/portainer-ce:latest
+    restart: always
+    entrypoint: ["/portainer"]
+    networks:
+      - homelab
+    ports:
+      - "100.123.195.125:9443:9443/tcp"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    working_dir: /
+
+  pihole:
+    container_name: pihole
+    image: pihole/pihole:latest
+    restart: unless-stopped
+    entrypoint: ["start.sh"]
+    environment:
+      TZ: America/New_York
+      WEBPASSWORD: ${PIHOLE_WEBPASSWORD}
+    networks:
+      - homelab
+    ports:
+      - "100.123.195.125:53:53/tcp"
+      - "100.123.195.125:53:53/udp"
+      - "100.123.195.125:8082:80/tcp"
+    volumes:
+      - dnsmasq_data:/etc/dnsmasq.d
+      - pihole_data:/etc/pihole
+    working_dir: /
+
+  netdata:
+    container_name: netdata
+    image: netdata/netdata
+    restart: unless-stopped
+    entrypoint: ["/usr/sbin/run.sh"]
+    networks:
+      - homelab
+    ports:
+      - "100.123.195.125:19999:19999/tcp"
+    security_opt:
+      - apparmor=unconfined
+
+  speedtest-tracker:
+    container_name: speedtest-tracker
+    image: lscr.io/linuxserver/speedtest-tracker:latest
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      APP_KEY: ${SPEEDTEST_APP_KEY}
+      DB_CONNECTION: sqlite
+      SPEEDTEST_SCHEDULE: "0 */4 * * *"
+    dns:
+      - 1.1.1.1
+      - 8.8.8.8
+    networks:
+      - homelab
+    ports:
+      - "100.123.195.125:8443:443/tcp"
+      - "100.123.195.125:8080:80/tcp"
+    volumes:
+      - /opt/speedtest-tracker/config:/config
+    working_dir: /
+
+  # ---------------------------------------------------------------------------
+  # OPENCLAW
+  # ---------------------------------------------------------------------------
+
+  openclaw-openclaw-gateway-1:
+    container_name: openclaw-openclaw-gateway-1
+    image: openclaw:local
+    restart: unless-stopped
+    command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789"]
+    entrypoint: ["docker-entrypoint.sh"]
+    environment:
+      CLAUDE_AI_SESSION_KEY: ""
+      CLAUDE_WEB_SESSION_KEY: ""
+      CLAUDE_WEB_COOKIE: ""
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
+      OPENCLAW_PREFER_PNPM: "1"
+      NODE_ENV: production
+      TERM: xterm-256color
+    networks:
+      - openclaw_default
+    ports:
+      - "100.123.195.125:18789:18789/tcp"
+      - "100.123.195.125:18790:18790/tcp"
+    user: node
+    volumes:
+      - /home/justin/.openclaw/workspace:/home/node/.openclaw/workspace
+      - /home/justin/.openclaw:/home/node/.openclaw
+    working_dir: /app
+
+  openclaw-openclaw-cli-1:
+    container_name: openclaw-openclaw-cli-1
+    image: openclaw:local
+    entrypoint: ["node", "dist/index.js"]
+    environment:
+      BROWSER: echo
+      CLAUDE_AI_SESSION_KEY: ""
+      CLAUDE_WEB_SESSION_KEY: ""
+      CLAUDE_WEB_COOKIE: ""
+      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
+      OPENCLAW_PREFER_PNPM: "1"
+      NODE_ENV: production
+      TERM: xterm-256color
+    networks:
+      - openclaw_default
+    stdin_open: true
+    tty: true
+    user: node
+    volumes:
+      - /home/justin/.openclaw/workspace:/home/node/.openclaw/workspace
+      - /home/justin/.openclaw:/home/node/.openclaw
+    working_dir: /app
