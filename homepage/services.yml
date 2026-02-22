@@ -1,0 +1,58 @@
+- Network Services:
+    - Pihole:
+        icon: mdi-pi-hole
+        href: http://IPADDRESS:8082/admin
+        description: network ad blocking
+        ping: http://IPADDRESS:8082/admin
+        widget:
+            type: pihole
+            url: http://pihole
+            version: 6
+            key: "{{PIHOLE_API_KEY}}"
+    - Tailscale:
+        icon: mdi-tailwind
+        href: https://tailscale.com
+        description: router connection
+        ping: https://tailscale.com
+        widget:
+            type: tailscale
+            deviceid: "{{TAILSCALE_DEVICE_ID}}"
+            key: "{{TAILSCALE_API_KEY}}"
+- Applications:
+    - Portainer:
+        icon: portainer
+        href: https://IPADDRESS:9443
+        description: Docker management
+        ping: https://portainer:9443
+        container: portainer
+        widget:
+          type: portainer
+          url: https://portainer:9443
+          env: 3
+          key: "{{PORTAINER_API_KEY}}"
+    - Bitwarden:
+        icon: mdi-lock
+        href: https://BITWARDEN_URL/#/login
+        target: "_blank"
+        description: password manager
+        ping: http://localhost:8081
+        widget:
+            type: docker
+            container: bitwarden-api
+- Information:
+    - Speedtest Tracker:
+        icon: mdi-speedometer
+        href: http://IPADDRESS:8080
+        description: speedtest
+        ping: http://IPADDRESS:8080
+        container: speedtest
+        widget:
+            type: speedtest
+            url: http://speedtest-tracker
+    - Netdata:
+        icon: netdata
+        href: http://IPADDRESS:19999
+        description: System metrics
+        widget:
+              type: netdata
+              url: http://netdata:19999
