@@ -1,0 +1,10 @@
+
+{
+    auto_https disable_redirects
+}
+{$CADDY_DOMAIN} {
+    tls {
+        get_certificate tailscale
+    }
+    reverse_proxy localhost:8081
+}
