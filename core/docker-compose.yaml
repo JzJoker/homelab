@@ -1,4 +1,4 @@
-version: "3.6"
+name: homelab
 
 # =============================================================================
 # NETWORKS
@@ -7,10 +7,6 @@ networks:
   homelab:
     external: true
     name: homelab
-
-  openclaw_default:
-    external: true
-    name: openclaw_default
 
 # =============================================================================
 # VOLUMES
@@ -42,10 +38,12 @@ services:
       HOMEPAGE_ALLOWED_HOSTS: "${HOST_IP}:3000,brickserver:3000"
       NODE_ENV: production
       PORT: "3000"
-      PIHOLE_API_KEY: ${PIHOLE_API_KEY}
-      TAILSCALE_DEVICE_ID: ${TAILSCALE_DEVICE_ID}
-      TAILSCALE_API_KEY: ${TAILSCALE_API_KEY}
-      PORTAINER_API_KEY: ${PORTAINER_API_KEY}
+      HOMEPAGE_VAR_PIHOLE_API_KEY: ${PIHOLE_API_KEY}
+      HOMEPAGE_VAR_TAILSCALE_DEVICE_ID: ${TAILSCALE_DEVICE_ID}
+      HOMEPAGE_VAR_TAILSCALE_API_KEY: ${TAILSCALE_API_KEY}
+      HOMEPAGE_VAR_PORTAINER_API_KEY: ${PORTAINER_API_KEY}
+      HOMEPAGE_VAR_HOST_IP: ${HOST_IP}
+      HOMEPAGE_VAR_CADDY_DOMAIN: ${CADDY_DOMAIN}
     networks:
       - homelab
     ports:
@@ -123,55 +121,3 @@ services:
     volumes:
       - /opt/speedtest-tracker/config:/config
     working_dir: /
-
-  # ---------------------------------------------------------------------------
-  # OPENCLAW
-  # ---------------------------------------------------------------------------
-
-  openclaw-openclaw-gateway-1:
-    container_name: openclaw-openclaw-gateway-1
-    image: openclaw:local
-    restart: unless-stopped
-    command: ["node", "dist/index.js", "gateway", "--bind", "lan", "--port", "18789"]
-    entrypoint: ["docker-entrypoint.sh"]
-    environment:
-      CLAUDE_AI_SESSION_KEY: ""
-      CLAUDE_WEB_SESSION_KEY: ""
-      CLAUDE_WEB_COOKIE: ""
-      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
-      OPENCLAW_PREFER_PNPM: "1"
-      NODE_ENV: production
-      TERM: xterm-256color
-    networks:
-      - openclaw_default
-    ports:
-      - "${HOST_IP}:18789:18789/tcp"
-      - "${HOST_IP}:18790:18790/tcp"
-    user: node
-    volumes:
-      - /home/justin/.openclaw/workspace:/home/node/.openclaw/workspace
-      - /home/justin/.openclaw:/home/node/.openclaw
-    working_dir: /app
-
-  openclaw-openclaw-cli-1:
-    container_name: openclaw-openclaw-cli-1
-    image: openclaw:local
-    entrypoint: ["node", "dist/index.js"]
-    environment:
-      BROWSER: echo
-      CLAUDE_AI_SESSION_KEY: ""
-      CLAUDE_WEB_SESSION_KEY: ""
-      CLAUDE_WEB_COOKIE: ""
-      OPENCLAW_GATEWAY_TOKEN: ${OPENCLAW_GATEWAY_TOKEN}
-      OPENCLAW_PREFER_PNPM: "1"
-      NODE_ENV: production
-      TERM: xterm-256color
-    networks:
-      - openclaw_default
-    stdin_open: true
-    tty: true
-    user: node
-    volumes:
-      - /home/justin/.openclaw/workspace:/home/node/.openclaw/workspace
-      - /home/justin/.openclaw:/home/node/.openclaw
-    working_dir: /app
