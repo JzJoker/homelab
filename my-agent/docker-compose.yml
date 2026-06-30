@@ -35,6 +35,12 @@ services:
       WORKSPACE_ROOT: /data/workspace
       # Bambu A1 camera snapshot (bambu-go2rtc container, shared homelab network)
       GO2RTC_SNAPSHOT_URL: http://bambu-go2rtc:1984/api/frame.jpeg?src=bambu_camera
+      # Voice /ask endpoint (ASK_TOKEN in .env enables it)
+      ASK_PORT: "8788"
+    ports:
+      # /ask voice endpoint, bound to the Tailscale IP only — reachable from the
+      # phone over the tailnet, never the LAN or public internet. Token-gated.
+      - "100.123.195.125:8788:8788"
     volumes:
       - my-agent-data:/data
     networks:
