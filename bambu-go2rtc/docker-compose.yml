@@ -1,0 +1,31 @@
+name: bambu-go2rtc
+
+# =============================================================================
+# bambu-go2rtc — Bambu A1 camera bridge
+# The A1 has no RTSP (unlike the X1); its camera is a TLS JPEG feed on port
+# 6000. camera-stream.py auths (bblp + access code) and pipes frames into
+# go2rtc, which exposes a snapshot + live view.
+#   - Simon reads snapshots over the homelab network: bambu-go2rtc:1984
+#   - Live view for you: http://<brickserver>:1984  (stream: bambu_camera)
+# Bridge files vendored from github.com/synman/bambu-go2rtc.
+# =============================================================================
+
+networks:
+  homelab:
+    external: true
+    name: homelab
+
+services:
+  bambu-go2rtc:
+    container_name: bambu-go2rtc
+    image: alexxit/go2rtc:latest
+    restart: unless-stopped
+    # PRINTER_ADDRESS + PRINTER_ACCESS_CODE — see .env.example
+    env_file: .env
+    ports:
+      - "1984:1984"   # go2rtc web UI + API (snapshot/MJPEG/WebRTC live view)
+    volumes:
+      - ./go2rtc.yaml:/config/go2rtc.yaml
+      - ./camera-stream.py:/config/camera-stream.py
+    networks:
+      - homelab
