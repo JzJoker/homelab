@@ -33,6 +33,8 @@ services:
       # Verify against your account's /v1/models; change here without a rebuild.
       AGENT_MODEL: kimi-k2.6
       WORKSPACE_ROOT: /data/workspace
+      # Bambu A1 camera snapshot (bambu-go2rtc container, shared homelab network)
+      GO2RTC_SNAPSHOT_URL: http://bambu-go2rtc:1984/api/frame.jpeg?src=bambu_camera
     volumes:
       - my-agent-data:/data
     networks:
