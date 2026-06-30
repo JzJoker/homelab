@@ -1,0 +1,39 @@
+name: my-agent
+
+# =============================================================================
+# my-agent — personal-assistant Telegram bot "Sam"
+# Long-poll worker (no inbound port, no Caddy route). Source lives in the
+# sibling repo ../../my-agent; secrets in .env (gitignored).
+# =============================================================================
+
+networks:
+  homelab:
+    external: true
+    name: homelab
+
+volumes:
+  # Agent's persistent disk: workspace + file-based memory (memory/, notes,
+  # conversations, reminders). Named volume, not a bind mount.
+  my-agent-data:
+
+services:
+  my-agent:
+    container_name: my-agent
+    build:
+      # Source tree is the sibling app fork; the Dockerfile lives here in the
+      # homelab repo (path is relative to the context).
+      context: ../../my-agent
+      dockerfile: ../homelab/my-agent/Dockerfile
+    image: my-agent:local
+    restart: unless-stopped
+    # Secrets (API keys, Telegram token/chat id) — see .env.example
+    env_file: .env
+    environment:
+      # Kimi model id as Moonshot's own API names it (no gateway prefix).
+      # Verify against your account's /v1/models; change here without a rebuild.
+      AGENT_MODEL: kimi-k2.6
+      WORKSPACE_ROOT: /data/workspace
+    volumes:
+      - my-agent-data:/data
+    networks:
+      - homelab

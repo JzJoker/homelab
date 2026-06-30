@@ -1,0 +1,12 @@
+node_modules
+.git
+.env
+.env.*
+workspace
+memory
+data
+.lmnr
+.claude
+.agent-team
+CLAUDE.md
+*.log
