@@ -51,7 +51,7 @@ services:
       HOMEPAGE_VAR_BAZARR_KEY: ${BAZARR_KEY}
       HOMEPAGE_VAR_QBIT_USER: ${QBIT_USER}
       HOMEPAGE_VAR_QBIT_PASS: ${QBIT_PASS}
-      HOMEPAGE_VAR_OVERSEERR_KEY: ${OVERSEERR_KEY}
+      HOMEPAGE_VAR_SEERR_KEY: ${SEERR_KEY}
     networks:
       - homelab
     ports:

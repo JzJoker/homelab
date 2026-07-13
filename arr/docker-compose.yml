@@ -124,23 +124,23 @@ services:
     working_dir: /
 
   # ---- Request portal: share with friends/family --------------------------
-  # Users sign in with their Plex account (or email invite), browse, and
-  # request titles which flow into Radarr/Sonarr for approval. Connect it to
-  # Plex + Radarr + Sonarr in its setup wizard (hosts: plex host IP:32400,
-  # radarr:7878, sonarr:8989).
-  overseerr:
-    container_name: overseerr
-    image: lscr.io/linuxserver/overseerr:latest
+  # Seerr = the maintained successor merging Overseerr + Jellyseerr (Overseerr
+  # was archived Feb 2026, sunset May 2026). Users sign in with their Plex
+  # account (or email invite), browse, and request titles which flow into
+  # Radarr/Sonarr for approval. Connect it to Plex + Radarr + Sonarr in its
+  # setup wizard (hosts: plex 100.123.195.125:32400, radarr:7878, sonarr:8989).
+  # Official image runs as UID 1000 with init:true; config at /app/config.
+  # Reuses the old Overseerr appdata dir — Seerr auto-migrates it on first boot.
+  seerr:
+    container_name: seerr
+    image: ghcr.io/seerr-team/seerr:latest
     restart: unless-stopped
-    entrypoint: ["/init"]
+    init: true
     environment:
-      PUID: "1000"
-      PGID: "1000"
       TZ: America/New_York
     networks:
       - homelab
     ports:
       - "${HOST_IP}:5055:5055/tcp"
     volumes:
-      - /opt/overseerr/config:/config
-    working_dir: /
+      - /opt/overseerr/config:/app/config

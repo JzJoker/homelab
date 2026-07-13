@@ -103,16 +103,16 @@
             url: http://qbittorrent:8090
             username: {{HOMEPAGE_VAR_QBIT_USER}}
             password: {{HOMEPAGE_VAR_QBIT_PASS}}
-    - Overseerr:
+    - Seerr:
         icon: overseerr
         href: http://{{HOMEPAGE_VAR_HOST_IP}}:5055
         description: request portal
-        ping: http://overseerr:5055
-        container: overseerr
+        ping: http://seerr:5055
+        container: seerr
         widget:
             type: overseerr
-            url: http://overseerr:5055
-            key: {{HOMEPAGE_VAR_OVERSEERR_KEY}}
+            url: http://seerr:5055
+            key: {{HOMEPAGE_VAR_SEERR_KEY}}
 - Information:
     - Speedtest Tracker:
         icon: mdi-speedometer
