@@ -1,0 +1,45 @@
+name: plex
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+# Plex is run with host networking (Plex's own recommendation): it needs
+# GDM/DLNA discovery broadcasts and a wide range of dynamic ports for remote
+# streaming, which a bridge network would otherwise NAT away.
+networks:
+  homelab:
+    external: true
+    name: homelab
+
+# =============================================================================
+# SERVICES
+# =============================================================================
+services:
+
+  plex:
+    container_name: plex
+    image: lscr.io/linuxserver/plex:latest
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    network_mode: host
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+      VERSION: docker
+      # Claim token from https://www.plex.tv/claim (valid ~4 min). Set on
+      # FIRST boot only to bind the server to your account, then remove.
+      PLEX_CLAIM: ${PLEX_CLAIM:-}
+    devices:
+      # Intel UHD 630 Quick Sync passthrough for hardware transcoding.
+      # Requires Plex Pass to actually engage HW transcode.
+      - /dev/dri:/dev/dri
+    volumes:
+      - /opt/plex/config:/config
+      - /srv/media/movies:/data/movies
+      - /srv/media/tv:/data/tv
+    # /transcode kept on tmpfs (RAM) to spare the SSD write-wear during
+    # transcodes. Capped so it can't exhaust the 7.6 GiB host.
+    tmpfs:
+      - /transcode:size=2g
+    working_dir: /

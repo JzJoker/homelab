@@ -44,13 +44,14 @@ services:
       HOMEPAGE_VAR_PORTAINER_API_KEY: ${PORTAINER_API_KEY}
       HOMEPAGE_VAR_HOST_IP: ${HOST_IP}
       HOMEPAGE_VAR_CADDY_DOMAIN: ${CADDY_DOMAIN}
+      HOMEPAGE_VAR_PLEX_TOKEN: ${PLEX_TOKEN}
     networks:
       - homelab
     ports:
       - "${HOST_IP}:3000:3000/tcp"
     user: root
     volumes:
-      - /opt/homepage/config:/app/config
+      - /home/justin/repos/homelab/homepage:/app/config
       - /var/run/docker.sock:/var/run/docker.sock:ro
     working_dir: /app
 

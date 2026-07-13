@@ -39,6 +39,18 @@
         widget:
             type: docker
             container: bitwarden-api
+- Media:
+    - Plex:
+        icon: plex
+        href: http://{{HOMEPAGE_VAR_HOST_IP}}:32400/web
+        target: "_blank"
+        description: media server
+        ping: http://{{HOMEPAGE_VAR_HOST_IP}}:32400/web
+        container: plex
+        widget:
+            type: plex
+            url: http://{{HOMEPAGE_VAR_HOST_IP}}:32400
+            key: {{HOMEPAGE_VAR_PLEX_TOKEN}}
 - Information:
     - Speedtest Tracker:
         icon: mdi-speedometer
