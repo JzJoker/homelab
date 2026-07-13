@@ -1,0 +1,146 @@
+name: arr
+
+# =============================================================================
+# NETWORKS
+# =============================================================================
+networks:
+  homelab:
+    external: true
+    name: homelab
+
+# =============================================================================
+# ARR MEDIA-AUTOMATION STACK
+# =============================================================================
+# Design: every app that touches files mounts the WHOLE media volume at /data
+# (not the movies/tv subdirs separately). This keeps downloads and the library
+# on ONE filesystem so Radarr/Sonarr can hardlink + atomic-move instead of a
+# slow, space-doubling copy. Expected on-disk layout under /srv/media:
+#   /srv/media/downloads   -> qBittorrent save path (/data/downloads)
+#   /srv/media/movies      -> Radarr library        (/data/movies)
+#   /srv/media/tv          -> Sonarr library        (/data/tv)
+#
+# All linuxserver.io images: PUID/PGID 1000 (justin), TZ, /init entrypoint.
+# =============================================================================
+services:
+
+  # ---- Indexer manager: feeds Sonarr/Radarr -------------------------------
+  prowlarr:
+    container_name: prowlarr
+    image: lscr.io/linuxserver/prowlarr:latest
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+    networks:
+      - homelab
+    ports:
+      - "${HOST_IP}:9696:9696/tcp"
+    volumes:
+      - /opt/prowlarr/config:/config
+    working_dir: /
+
+  # ---- Movie library manager ----------------------------------------------
+  radarr:
+    container_name: radarr
+    image: lscr.io/linuxserver/radarr:latest
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+    networks:
+      - homelab
+    ports:
+      - "${HOST_IP}:7878:7878/tcp"
+    volumes:
+      - /opt/radarr/config:/config
+      - /srv/media:/data
+    working_dir: /
+
+  # ---- TV library manager -------------------------------------------------
+  sonarr:
+    container_name: sonarr
+    image: lscr.io/linuxserver/sonarr:latest
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+    networks:
+      - homelab
+    ports:
+      - "${HOST_IP}:8989:8989/tcp"
+    volumes:
+      - /opt/sonarr/config:/config
+      - /srv/media:/data
+    working_dir: /
+
+  # ---- Subtitle automation ------------------------------------------------
+  bazarr:
+    container_name: bazarr
+    image: lscr.io/linuxserver/bazarr:latest
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+    networks:
+      - homelab
+    ports:
+      - "${HOST_IP}:6767:6767/tcp"
+    volumes:
+      - /opt/bazarr/config:/config
+      - /srv/media:/data
+    working_dir: /
+
+  # ---- Download client (BitTorrent) ---------------------------------------
+  # WebUI on 8090 because 8080 is taken by speedtest-tracker. Set qBittorrent's
+  # default save path to /data/downloads in the WebUI after first login.
+  # For Usenet instead/as well, add a SABnzbd service on the same /data mount.
+  qbittorrent:
+    container_name: qbittorrent
+    image: lscr.io/linuxserver/qbittorrent:latest
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+      WEBUI_PORT: "8090"
+    networks:
+      - homelab
+    ports:
+      - "${HOST_IP}:8090:8090/tcp"
+      - "6881:6881/tcp"
+      - "6881:6881/udp"
+    volumes:
+      - /opt/qbittorrent/config:/config
+      - /srv/media:/data
+    working_dir: /
+
+  # ---- Request portal: share with friends/family --------------------------
+  # Users sign in with their Plex account (or email invite), browse, and
+  # request titles which flow into Radarr/Sonarr for approval. Connect it to
+  # Plex + Radarr + Sonarr in its setup wizard (hosts: plex host IP:32400,
+  # radarr:7878, sonarr:8989).
+  overseerr:
+    container_name: overseerr
+    image: lscr.io/linuxserver/overseerr:latest
+    restart: unless-stopped
+    entrypoint: ["/init"]
+    environment:
+      PUID: "1000"
+      PGID: "1000"
+      TZ: America/New_York
+    networks:
+      - homelab
+    ports:
+      - "${HOST_IP}:5055:5055/tcp"
+    volumes:
+      - /opt/overseerr/config:/config
+    working_dir: /

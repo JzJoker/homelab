@@ -51,6 +51,68 @@
             type: plex
             url: http://{{HOMEPAGE_VAR_HOST_IP}}:32400
             key: {{HOMEPAGE_VAR_PLEX_TOKEN}}
+- Media Automation:
+    - Prowlarr:
+        icon: prowlarr
+        href: http://{{HOMEPAGE_VAR_HOST_IP}}:9696
+        description: indexer manager
+        ping: http://prowlarr:9696
+        container: prowlarr
+        widget:
+            type: prowlarr
+            url: http://prowlarr:9696
+            key: {{HOMEPAGE_VAR_PROWLARR_KEY}}
+    - Radarr:
+        icon: radarr
+        href: http://{{HOMEPAGE_VAR_HOST_IP}}:7878
+        description: movie library
+        ping: http://radarr:7878
+        container: radarr
+        widget:
+            type: radarr
+            url: http://radarr:7878
+            key: {{HOMEPAGE_VAR_RADARR_KEY}}
+    - Sonarr:
+        icon: sonarr
+        href: http://{{HOMEPAGE_VAR_HOST_IP}}:8989
+        description: tv library
+        ping: http://sonarr:8989
+        container: sonarr
+        widget:
+            type: sonarr
+            url: http://sonarr:8989
+            key: {{HOMEPAGE_VAR_SONARR_KEY}}
+    - Bazarr:
+        icon: bazarr
+        href: http://{{HOMEPAGE_VAR_HOST_IP}}:6767
+        description: subtitles
+        ping: http://bazarr:6767
+        container: bazarr
+        widget:
+            type: bazarr
+            url: http://bazarr:6767
+            key: {{HOMEPAGE_VAR_BAZARR_KEY}}
+    - qBittorrent:
+        icon: qbittorrent
+        href: http://{{HOMEPAGE_VAR_HOST_IP}}:8090
+        description: download client
+        ping: http://qbittorrent:8090
+        container: qbittorrent
+        widget:
+            type: qbittorrent
+            url: http://qbittorrent:8090
+            username: {{HOMEPAGE_VAR_QBIT_USER}}
+            password: {{HOMEPAGE_VAR_QBIT_PASS}}
+    - Overseerr:
+        icon: overseerr
+        href: http://{{HOMEPAGE_VAR_HOST_IP}}:5055
+        description: request portal
+        ping: http://overseerr:5055
+        container: overseerr
+        widget:
+            type: overseerr
+            url: http://overseerr:5055
+            key: {{HOMEPAGE_VAR_OVERSEERR_KEY}}
 - Information:
     - Speedtest Tracker:
         icon: mdi-speedometer
